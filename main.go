@@ -161,6 +161,7 @@ func main() {
 	fmt.Println(date)
 	fmt.Println(rev)
 	fmt.Println(BSDateInNepali(out, "/"))
+	fmt.Println(BSMonthName(out, false))
 }
 
 func ADtoBS(ad time.Time) (GomitiDate, error) {
@@ -185,7 +186,6 @@ func ADtoBS(ad time.Time) (GomitiDate, error) {
 	return GomitiDate{}, fmt.Errorf("date out of supported range")
 }
 func BStoAD(bs GomitiDate) time.Time {
-
 	tempEnglish := firstEnglishDate
 	return tempEnglish.Add(time.Duration(time.Hour * 24 * time.Duration(DaysBetweenBSDates(firstNepaliDate, bs))))
 }
@@ -211,6 +211,13 @@ func BSDateInNepali(bs GomitiDate, delim string) string {
 	sb.Write([]byte(delim))
 	toNepaliDigitString(bs.Day, &sb)
 	return sb.String()
+}
+func BSMonthName(bs GomitiDate, inNepali bool) string {
+	if inNepali {
+		return NepaliMonthName[bs.Month][1]
+	} else {
+		return NepaliMonthName[bs.Month][0]
+	}
 }
 func toNepaliDigitString(digit int, sb *strings.Builder) {
 	if digit == 0 {
