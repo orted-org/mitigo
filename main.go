@@ -155,23 +155,32 @@ func init() {
 	}
 }
 func main() {
-	date := time.Date(1999, time.November, 23, 0, 0, 0, 0, time.UTC)
-	out, _ := ADtoBS(date)
-	rev := BStoAD(out)
+	date := time.Date(1942, time.November, 23, 0, 0, 0, 0, time.UTC)
+	out, err := ADtoBS(date)
+	if err != nil {
+		fmt.Println(err)
+	}
+	rev, err := BStoAD(out)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println(date)
 	fmt.Println(rev)
-	fmt.Println(BSDateInNepali(out, "/"))
+	fmt.Println(BSDateInNepali(out, "-"))
 	fmt.Println(BSMonthName(out, false))
 }
 
 func ADtoBS(ad time.Time) (GomitiDate, error) {
 	ad = time.Date(ad.Year(), ad.Month(), ad.Day(), 0, 0, 0, 0, time.UTC)
 
+	if ad.Before(firstEnglishDate) {
+		return GomitiDate{}, fmt.Errorf("date out of supported range")
+	}
+
 	// difference between first english and requested english date
 	daysDiff := int(ad.Sub(firstEnglishDate).Hours() / 24)
 	for i := (daysDiff / 365) - 1; i <= (daysDiff/365)+1; i++ {
 		if totalDaysInNepaliYear[firstNepaliDate.Year+i] > daysDiff {
-
 			//nows days left to consider
 			daysDiff -= totalDaysInNepaliYear[firstNepaliDate.Year+i-1]
 			for j := 0; j < 12; j++ {
@@ -185,9 +194,13 @@ func ADtoBS(ad time.Time) (GomitiDate, error) {
 	}
 	return GomitiDate{}, fmt.Errorf("date out of supported range")
 }
-func BStoAD(bs GomitiDate) time.Time {
-	tempEnglish := firstEnglishDate
-	return tempEnglish.Add(time.Duration(time.Hour * 24 * time.Duration(DaysBetweenBSDates(firstNepaliDate, bs))))
+func BStoAD(bs GomitiDate) (time.Time, error) {
+	if diffDays := DaysBetweenBSDates(firstNepaliDate, bs); diffDays < 0 {
+		return firstEnglishDate, fmt.Errorf("date out of supported range")
+	} else {
+		tempEnglish := firstEnglishDate
+		return tempEnglish.Add(time.Duration(time.Hour * 24 * time.Duration(diffDays))), nil
+	}
 }
 func DaysBetweenBSDates(start, end GomitiDate) int {
 	diffStart := start.Day
@@ -205,11 +218,11 @@ func DaysBetweenBSDates(start, end GomitiDate) int {
 }
 func BSDateInNepali(bs GomitiDate, delim string) string {
 	var sb strings.Builder
-	toNepaliDigitString(bs.Year, &sb)
+	ToNepaliDigitString(bs.Year, &sb)
 	sb.Write([]byte(delim))
-	toNepaliDigitString(bs.Month, &sb)
+	ToNepaliDigitString(bs.Month, &sb)
 	sb.Write([]byte(delim))
-	toNepaliDigitString(bs.Day, &sb)
+	ToNepaliDigitString(bs.Day, &sb)
 	return sb.String()
 }
 func BSMonthName(bs GomitiDate, inNepali bool) string {
@@ -219,10 +232,10 @@ func BSMonthName(bs GomitiDate, inNepali bool) string {
 		return NepaliMonthName[bs.Month][0]
 	}
 }
-func toNepaliDigitString(digit int, sb *strings.Builder) {
+func ToNepaliDigitString(digit int, sb *strings.Builder) {
 	if digit == 0 {
 		return
 	}
-	toNepaliDigitString(digit/10, sb)
+	ToNepaliDigitString(digit/10, sb)
 	sb.Write([]byte(NepaliDigit[digit%10]))
 }
