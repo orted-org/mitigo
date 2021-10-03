@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -99,19 +100,32 @@ var NepaliDateMap map[int][12]int = map[int][12]int{
 	2090: {30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30},
 }
 
-var NepaliDigit map[int]rune = map[int]rune{
-	0: '०',
-	1: '१',
-	2: '२',
-	3: '३',
-	4: '४',
-	5: '५',
-	6: '६',
-	7: '७',
-	8: '८',
-	9: '९',
+var NepaliDigit map[int]string = map[int]string{
+	0: "०",
+	1: "१",
+	2: "२",
+	3: "३",
+	4: "४",
+	5: "५",
+	6: "६",
+	7: "७",
+	8: "८",
+	9: "९",
 }
-var NepaliDays map[int][2]string = map[int][2]string{}
+var NepaliMonthName map[int][2]string = map[int][2]string{
+	1:  {"Baisakh", "वैशाख"},
+	2:  {"Jeshta", "जेठ"},
+	3:  {"Ashadh", "असार"},
+	4:  {"Shrawan", "श्रावण"},
+	5:  {"Bhadau", "भदौ"},
+	6:  {"Ashwin", "असोज"},
+	7:  {"Kartik", "कार्तिक"},
+	8:  {"Mangsir", "मंसिर"},
+	9:  {"Poush", "पौष"},
+	10: {"Magh", "माघ"},
+	11: {"Falgun", "फागुन"},
+	12: {"Chaitra", "चैत"},
+}
 
 type GomitiDate struct {
 	Year  int
@@ -141,12 +155,12 @@ func init() {
 	}
 }
 func main() {
-	fmt.Println(NepaliDigit)
-	date := time.Date(1985, time.November, 23, 0, 0, 0, 0, time.UTC)
+	date := time.Date(1999, time.November, 23, 0, 0, 0, 0, time.UTC)
 	out, _ := ADtoBS(date)
 	rev := BStoAD(out)
 	fmt.Println(date)
 	fmt.Println(rev)
+	fmt.Println(BSDateInNepali(out, "/"))
 }
 
 func ADtoBS(ad time.Time) (GomitiDate, error) {
@@ -188,4 +202,20 @@ func DaysBetweenBSDates(start, end GomitiDate) int {
 	}
 
 	return diffEnd - diffStart
+}
+func BSDateInNepali(bs GomitiDate, delim string) string {
+	var sb strings.Builder
+	toNepaliDigitString(bs.Year, &sb)
+	sb.Write([]byte(delim))
+	toNepaliDigitString(bs.Month, &sb)
+	sb.Write([]byte(delim))
+	toNepaliDigitString(bs.Day, &sb)
+	return sb.String()
+}
+func toNepaliDigitString(digit int, sb *strings.Builder) {
+	if digit == 0 {
+		return
+	}
+	toNepaliDigitString(digit/10, sb)
+	sb.Write([]byte(NepaliDigit[digit%10]))
 }
