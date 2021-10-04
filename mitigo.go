@@ -139,7 +139,7 @@ type MitigoDate struct {
 // first nepali date
 var firstNepaliDate = MitigoDate{
 	Year:  2000,
-	Month: 0,
+	Month: 1,
 	Day:   1,
 }
 
