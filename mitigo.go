@@ -169,7 +169,7 @@ func ADtoBS(ad time.Time) (MitigoDate, error) {
 	}
 
 	// difference between first english and requested english date
-	daysDiff := int(ad.Sub(firstEnglishDate).Hours() / 24)
+	daysDiff := int(ad.Sub(firstEnglishDate).Hours()/24) + 1
 	for i := (daysDiff / 365) - 1; i <= (daysDiff/365)+1; i++ {
 		if cumulativeDaysInNepaliYear[firstNepaliDate.Year+i] > daysDiff {
 			//nows days left to consider
@@ -177,7 +177,7 @@ func ADtoBS(ad time.Time) (MitigoDate, error) {
 			for j := 0; j < 12; j++ {
 				daysDiff -= NepaliDateMap[firstNepaliDate.Year+i][j]
 				if daysDiff <= 0 {
-					return MitigoDate{firstNepaliDate.Year + i, j + 1, NepaliDateMap[firstNepaliDate.Year+i][j] + daysDiff + 1}, nil
+					return MitigoDate{firstNepaliDate.Year + i, j + 1, NepaliDateMap[firstNepaliDate.Year+i][j] + daysDiff}, nil
 				}
 			}
 			break
@@ -239,4 +239,14 @@ func ToNepaliDigitString(digit int, str *string) {
 	}
 	ToNepaliDigitString(digit/10, str)
 	*str += NepaliDigit[digit%10]
+}
+
+// returns back date after nDays of days. nDays can be negative or positive according to need
+func BSDaysAfter(bs MitigoDate, nDays int) (MitigoDate, error) {
+	inAD, err := BStoAD(bs)
+	if err != nil {
+		return bs, err
+	}
+	inAD = inAD.Add(time.Duration(time.Hour * 24 * time.Duration(nDays)))
+	return ADtoBS(inAD)
 }

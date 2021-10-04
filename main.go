@@ -11,12 +11,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	rev, err := BStoAD(out)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(date)
-	fmt.Println(rev)
-	fmt.Println(BSDateInNepali(out, "-"))
-	fmt.Println(BSMonthName(out, true))
+	fmt.Println(out)
+	fmt.Println(BSDaysAfter(out, -6))
 }
