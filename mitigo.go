@@ -223,6 +223,17 @@ func BSDateInNepali(bs MitigoDate, delim string) string {
 	return str
 }
 
+// returns BS date in Nepali typing in format YYYYdelimMMdelimDay
+func BSDateInNepaliLong(bs MitigoDate, delim string) string {
+	str := ""
+	ToNepaliDigitString(bs.Year, &str)
+	str += delim
+	str += NepaliMonthName[bs.Month][1]
+	str += delim
+	ToNepaliDigitString(bs.Day, &str)
+	return str
+}
+
 // returns BS month name in Nepali or English typing
 func BSMonthName(bs MitigoDate, inNepali bool) string {
 	if inNepali {
